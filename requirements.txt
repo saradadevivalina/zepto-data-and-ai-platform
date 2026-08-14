@@ -8,3 +8,10 @@ matplotlib
 seaborn
 joblib
 jupyterlab
+fastapi
+uvicorn
+pydantic
+chromadb
+sentence-transformers
+langgraph
+groq
