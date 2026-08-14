@@ -1,0 +1,9 @@
+﻿https://download.pytorch.org/whl/cpu/torch-2.2.0%2Bcpu-cp310-cp310-linux_x86_64.whl
+fastapi
+uvicorn
+pydantic
+langchain
+langchain-community
+langgraph
+chromadb
+sentence-transformers
