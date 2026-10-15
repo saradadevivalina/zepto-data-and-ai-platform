@@ -1,0 +1,15 @@
+# secrets
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# generated vector database
+chroma_db/
+
+# scratch files
+git_output.txt
+
+# virtual environment
+.venv/
