@@ -1,0 +1,6 @@
+# Keep secrets, caches and the locally built vector store out of the Docker image
+.env
+__pycache__/
+*.pyc
+chroma_db/
+git_output.txt
