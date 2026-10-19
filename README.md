@@ -13,19 +13,21 @@ An end-to-end AI/ML platform joining Zepto's analytics guild workflow: a data-en
 ```
 zepto-data-and-ai-platform/
 ├── data_pipeline/          # Module 1 — scrape, clean, convert, load to SQLite
-│   ├── data_pipeline.py
+│   ├── data_pipeline.ipynb
+│   ├── raw_books.csv / cleaned_books.csv
 │   ├── books_database.db
 │   └── README.md
 ├── analytics/               # Module 2 — EDA + predictive modeling on Titanic
 │   ├── 01_eda.ipynb
 │   ├── 02_modeling.ipynb
 │   ├── titanic.csv
-│   ├── best_titanic_pipeline.joblib
+│   ├── titanic_best_random_forest_pipeline.joblib
 │   └── README.md
 ├── support_assistant/       # Module 3 — RAG-grounded policy support agent
 │   ├── docs/                # 8 Zepto policy documents
-│   ├── app/                 # FastAPI + LangGraph application code
+│   ├── app/                 # config, corpus_loader, schemas, prompts, graph (LangGraph), main (FastAPI)
 │   ├── Dockerfile
+│   ├── requirements.txt
 │   └── README.md
 ├── requirements.txt
 └── README.md                 # you are here
@@ -43,7 +45,10 @@ pip install -r data_pipeline/requirements.txt
 pip install -r analytics/requirements.txt
 pip install -r support_assistant/requirements.txt
 ```
-(Or use the consolidated root `requirements.txt` covering all three, if provided as a single file — see comments at the top of that file for which approach this repo uses.)
+Or install everything for all three modules at once with the root file:
+```bash
+pip install -r requirements.txt
+```
 
 ---
 
@@ -52,7 +57,7 @@ pip install -r support_assistant/requirements.txt
 **`/data_pipeline`**
 ```bash
 cd data_pipeline
-python data_pipeline.py
+jupyter notebook data_pipeline.ipynb   # then Kernel → Restart & Run All
 ```
 Scrapes ≥60 books across 4 categories from books.toscrape.com, cleans and converts pricing to INR at a fixed rate, loads into a normalized SQLite database, and runs 5 required SQL queries with a pandas-merge verification. See `data_pipeline/README.md` for the full design rationale.
 
@@ -71,7 +76,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 7860
 docker build -t zepto-support-assistant .
 docker run -p 7860:7860 zepto-support-assistant
 ```
-Serves a `POST /ask` endpoint answering Zepto policy questions via a LangGraph-orchestrated RAG pipeline (ChromaDB + local sentence-transformer embeddings), routing between grounded policy answers and a fallback response for unrelated queries. Runs fully offline by default (`MOCK_LLM=1`) — no API key required for full marks. See `support_assistant/README.md` for the full architecture walkthrough and example call transcripts.
+Serves a `POST /ask` endpoint answering Zepto policy questions via a LangGraph-orchestrated RAG pipeline (ChromaDB + local `all-MiniLM-L6-v2` sentence-transformer embeddings, top-3 cosine retrieval), routing between grounded policy answers and a fallback response for unrelated queries. Interactive API docs are available at `http://127.0.0.1:7860/docs` while the server runs. Runs fully offline by default (`MOCK_LLM=1`) — no API key required for full marks. See `support_assistant/README.md` for the full architecture walkthrough and example call transcripts.
 
 ---
 

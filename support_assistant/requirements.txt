@@ -1,9 +1,10 @@
-﻿https://download.pytorch.org/whl/cpu/torch-2.2.0%2Bcpu-cp310-cp310-linux_x86_64.whl
+﻿# Support assistant dependencies
 fastapi
 uvicorn
-pydantic
-langchain
-langchain-community
+pydantic>=2
 langgraph
-chromadb
-sentence-transformers
+chromadb==1.5.9
+sentence-transformers==5.7.0
+
+# Optional: only needed for the real-LLM extension (MOCK_LLM=0)
+groq
