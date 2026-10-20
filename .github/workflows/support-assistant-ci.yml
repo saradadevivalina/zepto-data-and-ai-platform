@@ -21,7 +21,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build the Docker image
-        run: docker build -t zepto-support-assistant ./support_assistant
+        run: |
+          set -o pipefail
+          if ! docker build --progress=plain -t zepto-support-assistant ./support_assistant 2>&1 | tee build.log; then
+            # Surface the last lines of the build output as an annotation on the run page
+            MSG=$(tail -n 30 build.log | sed 's/%/%25/g' | sed ':a;N;$!ba;s/\n/%0A/g')
+            echo "::error title=Docker build failed::${MSG}"
+            exit 1
+          fi
 
       - name: Start the container
         run: docker run -d -p 7860:7860 --name support-assistant zepto-support-assistant
