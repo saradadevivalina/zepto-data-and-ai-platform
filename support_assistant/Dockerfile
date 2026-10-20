@@ -19,7 +19,7 @@ WORKDIR /home/user/app
 #    and the default build includes large GPU libraries this service does not use.
 # 2) Then install the remaining dependencies.
 COPY --chown=user requirements.txt .
-RUN pip install --no-cache-dir --user torch --index-url https://download.pytorch.org/whl/cpu \
+RUN pip install --no-cache-dir --user "torch==2.8.0+cpu" --extra-index-url https://download.pytorch.org/whl/cpu \
  && pip install --no-cache-dir --user -r requirements.txt
 
 # Copy the application code and the 8 policy documents
