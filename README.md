@@ -1,5 +1,7 @@
 # Zepto Data & AI Platform
 
+[![Support Assistant CI](https://github.com/saradadevivalina/zepto-data-and-ai-platform/actions/workflows/support-assistant-ci.yml/badge.svg)](https://github.com/saradadevivalina/zepto-data-and-ai-platform/actions/workflows/support-assistant-ci.yml)
+
 **Certificate Program in Artificial Intelligence and Machine Learning — Capstone Project**
 
 An end-to-end AI/ML platform joining Zepto's analytics guild workflow: a data-engineering pipeline that turns raw scraped data into a clean relational store, an analytics pipeline that profiles and models a customer/passenger-style dataset end to end, and a GenAI support assistant that answers policy questions grounded in Zepto's own documents. All three modules live together in this single repository as one coherent submission.

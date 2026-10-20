@@ -1,5 +1,7 @@
 # `/support_assistant` — Zepto Data & AI Platform
 
+[![Support Assistant CI](https://github.com/saradadevivalina/zepto-data-and-ai-platform/actions/workflows/support-assistant-ci.yml/badge.svg)](https://github.com/saradadevivalina/zepto-data-and-ai-platform/actions/workflows/support-assistant-ci.yml)
+
 A GenAI customer-support assistant that answers questions about Zepto's delivery, returns, membership, tracking, cancellation, damaged-item, gift-card and support-hours policies. Answers are grounded in Zepto's own policy documents through a **LangGraph-orchestrated RAG pipeline** (local `all-MiniLM-L6-v2` embeddings + ChromaDB), returned through a **FastAPI** `POST /ask` endpoint with a **Pydantic-validated** JSON response.
 
 The graded baseline runs **fully offline and deterministically** (`MOCK_LLM` unset or `1`): no API key, no signup and no network call to any LLM provider.
@@ -49,6 +51,8 @@ Then open `http://127.0.0.1:7860/docs` for the interactive API page, or call `PO
 docker build -t zepto-support-assistant .
 docker run -p 7860:7860 zepto-support-assistant
 ```
+
+**Continuous integration:** on every push that changes `support_assistant/`, the GitHub Actions workflow `.github/workflows/support-assistant-ci.yml` builds this Docker image, starts the container and calls `POST /ask` with a policy question (must return `doc_07` as the top source) and a general question (must return the canned reply with no sources). The badge at the top shows the latest result.
 
 **Quick module checks:**
 ```bash
