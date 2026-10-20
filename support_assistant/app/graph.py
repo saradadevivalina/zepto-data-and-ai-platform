@@ -28,7 +28,7 @@ POLICY_KEYWORDS = [
 GENERAL_ANSWER = "I can only answer questions about Zepto policies right now."
 
 # Real-LLM settings (only used when MOCK_LLM=0)
-GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant")
+GROQ_MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b")
 MAX_RETRIES = 2  # extra attempts if the LLM's JSON fails validation
 
 
