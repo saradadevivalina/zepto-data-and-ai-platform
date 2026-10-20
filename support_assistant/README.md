@@ -113,6 +113,28 @@ Raw JSON response:
 ```
 No policy keyword is present, so the query is routed to `direct_answer`, which returns the fixed canned string with an empty `sources` list. No retrieval and no LLM call happen.
 
+### Optional extension — real LLM (`MOCK_LLM=0`, Groq free tier)
+
+The optional real-LLM path was tested with Groq's free tier (free account, no payment) using the `openai/gpt-oss-20b` model. The API key is read from the `GROQ_API_KEY` environment variable and is never stored in the repository. The model can be changed with the `GROQ_MODEL` environment variable.
+
+```powershell
+$env:GROQ_API_KEY = "<your key>"     # set for the current terminal only
+$env:MOCK_LLM = "0"
+python -m app.graph
+```
+
+Recorded output:
+```
+Query:    What is the refund timeline for a returned item?
+Intent:   policy_question
+Response: {'answer': 'Approved refunds are credited to the original payment method within 3–5 business days, or instantly to the Zepto wallet if the customer opts for wallet credit.', 'sources': ['doc_02'], 'confidence': 1.0}
+
+Query:    What is the capital of France?
+Intent:   general_question
+Response: {'answer': 'The capital of France is Paris.', 'sources': [], 'confidence': 0.5}
+```
+In this mode the LLM classifies the intent, `retrieve_and_answer` sends the structured prompt (with the top-3 retrieved chunks) to the LLM, and the JSON reply is validated against `SupportResponse` — with up to 2 corrective retries if validation fails. `direct_answer` asks the LLM without retrieval and reports a fixed `confidence` of 0.5.
+
 ---
 
 ## Architecture: the RAG pipeline
