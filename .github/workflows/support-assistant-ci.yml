@@ -1,0 +1,59 @@
+# CI for the Zepto Support Assistant
+# On every push that touches support_assistant/, GitHub:
+#   1. builds the Docker image from support_assistant/Dockerfile
+#   2. starts the container (MOCK_LLM defaults to 1: fully offline)
+#   3. calls POST /ask with a policy question and a general question and checks the answers
+
+name: Support Assistant - Docker build & API smoke test
+
+on:
+  push:
+    paths:
+      - "support_assistant/**"
+      - ".github/workflows/support-assistant-ci.yml"
+  workflow_dispatch:   # allows a manual run from the Actions tab
+
+jobs:
+  docker-build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Build the Docker image
+        run: docker build -t zepto-support-assistant ./support_assistant
+
+      - name: Start the container
+        run: docker run -d -p 7860:7860 --name support-assistant zepto-support-assistant
+
+      - name: Wait for the API to be ready
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://127.0.0.1:7860/ > /dev/null; then
+              echo "API is up"; exit 0
+            fi
+            sleep 2
+          done
+          echo "API did not start in time"; docker logs support-assistant; exit 1
+
+      - name: "Smoke test 1: policy question is answered from doc_07 (Gift Cards)"
+        run: |
+          RESPONSE=$(curl -sf -X POST http://127.0.0.1:7860/ask \
+            -H "Content-Type: application/json" \
+            -d '{"query": "Can I combine two gift cards in one order?"}')
+          echo "$RESPONSE"
+          echo "$RESPONSE" | grep -q '"sources":\["doc_07"'
+          echo "$RESPONSE" | grep -q 'Based on the retrieved context'
+
+      - name: "Smoke test 2: general question gets the canned reply with no sources"
+        run: |
+          RESPONSE=$(curl -sf -X POST http://127.0.0.1:7860/ask \
+            -H "Content-Type: application/json" \
+            -d '{"query": "What is the capital of France?"}')
+          echo "$RESPONSE"
+          echo "$RESPONSE" | grep -q 'I can only answer questions about Zepto policies right now.'
+          echo "$RESPONSE" | grep -q '"sources":\[\]'
+
+      - name: Show container logs
+        if: always()
+        run: docker logs support-assistant || true
