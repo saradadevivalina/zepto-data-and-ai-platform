@@ -61,6 +61,15 @@ jobs:
           echo "$RESPONSE" | grep -q 'I can only answer questions about Zepto policies right now.'
           echo "$RESPONSE" | grep -q '"sources":\[\]'
 
+      - name: "Smoke test 3: /metrics reports both requests"
+        run: |
+          RESPONSE=$(curl -sf http://127.0.0.1:7860/metrics)
+          echo "$RESPONSE"
+          echo "$RESPONSE" | grep -q '"total_requests":2'
+          echo "$RESPONSE" | grep -q '"policy_question":1'
+          echo "$RESPONSE" | grep -q '"general_question":1'
+          echo "$RESPONSE" | grep -q '"errors":0'
+
       - name: Show container logs
         if: always()
         run: docker logs support-assistant || true

@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 chroma_db/
 git_output.txt
+logs/

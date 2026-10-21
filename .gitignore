@@ -13,3 +13,6 @@ git_output.txt
 
 # virtual environment
 .venv/
+
+# request logs written by the API
+logs/

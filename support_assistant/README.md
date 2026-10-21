@@ -20,7 +20,8 @@ support_assistant/
 │   ├── schemas.py        # Pydantic request/response models
 │   ├── prompts.py        # structured RAG prompt template (used when MOCK_LLM=0)
 │   ├── graph.py          # LangGraph StateGraph: routing, retrieval, generation
-│   └── main.py           # FastAPI app exposing POST /ask
+│   ├── monitoring.py     # request log (JSONL) + live counters for GET /metrics
+│   └── main.py           # FastAPI app exposing POST /ask and GET /metrics
 ├── Dockerfile
 ├── requirements.txt
 └── README.md
@@ -52,7 +53,7 @@ docker build -t zepto-support-assistant .
 docker run -p 7860:7860 zepto-support-assistant
 ```
 
-**Continuous integration:** on every push that changes `support_assistant/`, the GitHub Actions workflow `.github/workflows/support-assistant-ci.yml` builds this Docker image, starts the container and calls `POST /ask` with a policy question (must return `doc_07` as the top source) and a general question (must return the canned reply with no sources). The badge at the top shows the latest result.
+**Continuous integration:** on every push that changes `support_assistant/`, the GitHub Actions workflow `.github/workflows/support-assistant-ci.yml` builds this Docker image, starts the container and calls `POST /ask` with a policy question (must return `doc_07` as the top source) and a general question (must return the canned reply with no sources), then checks that `GET /metrics` recorded both requests with zero errors. The badge at the top shows the latest result.
 
 **Quick module checks:**
 ```bash
@@ -134,6 +135,22 @@ Intent:   general_question
 Response: {'answer': 'The capital of France is Paris.', 'sources': [], 'confidence': 0.5}
 ```
 In this mode the LLM classifies the intent, `retrieve_and_answer` sends the structured prompt (with the top-3 retrieved chunks) to the LLM, and the JSON reply is validated against `SupportResponse` — with up to 2 corrective retries if validation fails. `direct_answer` asks the LLM without retrieval and reports a fixed `confidence` of 0.5.
+
+### Monitoring (`GET /metrics`)
+
+Every `/ask` request is recorded by `app/monitoring.py`:
+- appended as one JSON line to `logs/requests.jsonl` (timestamp, intent, top retrieved source, number of sources, confidence, latency, LLM mode and any error), giving a persistent audit trail
+- added to live counters served by **`GET /metrics`**: total requests, errors and error rate, intent mix (policy vs general), which document was retrieved first, latency p50 / p95 / max, average confidence and the number of low-confidence answers (below 0.6)
+
+Example after the two calls above:
+```json
+{"total_requests": 2, "errors": 0, "error_rate": 0.0,
+ "intent_counts": {"policy_question": 1, "general_question": 1},
+ "top_source_counts": {"doc_07": 1},
+ "latency_ms": {"p50": "...", "p95": "...", "max": "..."},
+ "avg_confidence": 1.0, "low_confidence_answers": 0, "mock_llm": true, "uptime_seconds": "..."}
+```
+Latency values depend on the machine. The CI workflow checks that `/metrics` reports both smoke-test requests with zero errors. Monitoring failures never affect a customer request.
 
 ---
 
